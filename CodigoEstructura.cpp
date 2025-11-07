@@ -621,3 +621,151 @@ void mostrarHistorial() {
         cout << (i+1) << ". " << historialAtenciones[i] << endl;
     }
 }
+
+void menuPrincipal() {
+    cout << "\n+----------------------------------------+\n";
+    cout << "¦  SISTEMA DE GESTION DE PACIENTES      ¦\n";
+    cout << "+----------------------------------------+\n";
+    cout << "1.  Registrar paciente\n";
+    cout << "2.  Atender paciente\n";
+    cout << "3.  Mostrar todos los pacientes\n";
+    cout << "4.  Buscar paciente por nombre\n";
+    cout << "5.  Actualizar estado de paciente\n";
+    cout << "6.  Ordenar cola por prioridad\n";
+    cout << "7.  Ordenar cola por edad\n";
+    cout << "8.  Mostrar medicamentos disponibles\n";
+    cout << "9.  Buscar medicamento\n";
+    cout << "10. Ordenar lista de medicamentos\n";
+    cout << "11. Mostrar horarios disponibles\n";
+    cout << "12. Mostrar historial de atenciones\n";
+    cout << "13. Cantidad de pacientes en espera\n";
+    cout << "14. Agregar receta medica a paciente\n";
+    cout << "15. Ver receta medica de paciente\n";
+    cout << "16. Listar todas las recetas guardadas\n";
+    cout << "0.  Salir\n";
+    cout << "----------------------------------------\n";
+    cout << "Opcion: ";
+}
+
+// ============================================
+// FUNCION PRINCIPAL
+// ============================================
+int main() {
+    ColaPacientes cola;
+    PilaHistorial historial;
+    int opcion;
+    
+    // Inicializar datos
+    inicializarHorarios();
+    crearDirectorioRecetas();
+    
+    cout << "\n*** SISTEMA INICIADO ***\n";
+    cout << "Carpeta 'Recetas_Medicas' creada/verificada.\n";
+    
+    do {
+        menuPrincipal();
+        cin >> opcion;
+        
+        switch(opcion) {
+            case 1:
+                registrarPaciente(cola);
+                break;
+                
+            case 2:
+                atenderPaciente(cola, historial);
+                break;
+                
+            case 3:
+                cola.mostrarTodos();
+                break;
+                
+            case 4:
+                buscarPaciente(cola);
+                break;
+                
+            case 5: {
+                string nombre, estado;
+                cout << "\nNombre del paciente: ";
+                cin.ignore();
+                getline(cin, nombre);
+                cout << "Nuevo estado: ";
+                getline(cin, estado);
+                cola.actualizarEstado(nombre, estado);
+                break;
+            }
+                
+            case 6:
+                cola.ordenarPorPrioridad();
+                break;
+                
+            case 7:
+                cola.ordenarPorEdad();
+                break;
+                
+            case 8:
+                mostrarMedicamentos();
+                break;
+                
+            case 9: {
+                string med;
+                cout << "\nNombre del medicamento: ";
+                cin.ignore();
+                getline(cin, med);
+                int pos = buscarMedicamento(med);
+                if(pos != -1) {
+                    cout << "Medicamento encontrado en posicion " << (pos+1) << endl;
+                } else {
+                    cout << "Medicamento no encontrado.\n";
+                }
+                break;
+            }
+                
+            case 10:
+                ordenarMedicamentos();
+                break;
+                
+            case 11:
+                mostrarHorarios();
+                break;
+                
+            case 12:
+                mostrarHistorial();
+                break;
+                
+            case 13:
+                cout << "\nPacientes en espera: " << cola.obtenerCantidad() << endl;
+                break;
+                
+            case 14:
+                agregarRecetaMedica(cola);
+                break;
+                
+            case 15:
+                verRecetaMedica(cola);
+                break;
+                
+            case 16:
+                listarRecetasMedicas();
+                break;
+                
+            case 0:
+                cout << "\nSaliendo del sistema...\n";
+                break;
+                
+            default:
+                cout << "\nOpcion invalida.\n";
+        }
+        
+        if(opcion != 0) {
+            cout << "\nPresione Enter para continuar...";
+            cin.ignore();
+            cin.get();
+            system("cls"); // Para Windows
+            // system("clear"); // Para Linux/Mac
+        }
+        
+    } while(opcion != 0);
+    
+    cout << "\nGracias por usar el sistema.\n";
+    return 0;
+}
