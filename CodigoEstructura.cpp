@@ -418,3 +418,206 @@ public:
         vaciar();
     }
 };
+
+// ============================================
+// PARTE 9: PILA PARA DESHACER OPERACIONES
+// ============================================
+struct NodoPila {
+    Paciente datos;
+    NodoPila* siguiente;
+};
+
+class PilaHistorial {
+private:
+    NodoPila* tope;
+    
+public:
+    PilaHistorial() {
+        tope = NULL;
+    }
+    
+    void apilar(Paciente p) {
+        NodoPila* nuevo = new NodoPila;
+        nuevo->datos = p;
+        nuevo->siguiente = tope;
+        tope = nuevo;
+    }
+    
+    Paciente desapilar() {
+        if(tope == NULL) {
+            Paciente vacio;
+            vacio.nombre = "ERROR";
+            return vacio;
+        }
+        
+        NodoPila* temp = tope;
+        Paciente p = tope->datos;
+        tope = tope->siguiente;
+        delete temp;
+        return p;
+    }
+    
+    bool estaVacia() {
+        return tope == NULL;
+    }
+};
+
+// ============================================
+// FUNCIONES DE BUSQUEDA EN ARRAYS
+// ============================================
+
+// Busqueda lineal en array de medicamentos
+int buscarMedicamento(string nombre) {
+    for(int i = 0; i < cantidadMedicamentos; i++) {
+        if(listaMedicamentos[i] == nombre) {
+            return i;
+        }
+    }
+    return -1; // No encontrado
+}
+
+// ============================================
+// ALGORITMO DE ORDENACION PARA ARRAYS
+// ============================================
+
+// Ordenar medicamentos alfabeticamente (Insercion)
+void ordenarMedicamentos() {
+    for(int i = 1; i < cantidadMedicamentos; i++) {
+        string key = listaMedicamentos[i];
+        int j = i - 1;
+        
+        while(j >= 0 && listaMedicamentos[j] > key) {
+            listaMedicamentos[j + 1] = listaMedicamentos[j];
+            j--;
+        }
+        listaMedicamentos[j + 1] = key;
+    }
+    cout << "\nMedicamentos ordenados alfabeticamente.\n";
+}
+
+// Mostrar medicamentos
+void mostrarMedicamentos() {
+    cout << "\n=== LISTA DE MEDICAMENTOS ===\n";
+    for(int i = 0; i < cantidadMedicamentos; i++) {
+        cout << (i+1) << ". " << listaMedicamentos[i] << endl;
+    }
+}
+
+// ============================================
+// FUNCIONES PRINCIPALES DEL SISTEMA
+// ============================================
+
+void registrarPaciente(ColaPacientes& cola) {
+    Paciente nuevo;
+    
+    cout << "\n=== REGISTRAR NUEVO PACIENTE ===\n";
+    cin.ignore();
+    cout << "Nombre completo: ";
+    getline(cin, nuevo.nombre);
+    
+    cout << "DNI: ";
+    getline(cin, nuevo.dni);
+    
+    cout << "Edad: ";
+    cin >> nuevo.edad;
+    
+    cin.ignore();
+    cout << "Motivo de consulta: ";
+    getline(cin, nuevo.motivo);
+    
+    cout << "Prioridad (1=Urgente, 2=Normal, 3=Baja): ";
+    cin >> nuevo.prioridad;
+    
+    nuevo.estado = "En espera";
+    nuevo.tieneReceta = false;
+    nuevo.rutaReceta = "";
+    
+    cola.encolar(nuevo);
+    cout << "\n¡Paciente registrado exitosamente!\n";
+}
+
+void atenderPaciente(ColaPacientes& cola, PilaHistorial& pila) {
+    if(cola.estaVacia()) {
+        cout << "\nNo hay pacientes para atender.\n";
+        return;
+    }
+    
+    Paciente p = cola.desencolar();
+    cout << "\n=== ATENDIENDO PACIENTE ===\n";
+    cout << "Nombre: " << p.nombre << endl;
+    cout << "DNI: " << p.dni << endl;
+    cout << "Edad: " << p.edad << endl;
+    cout << "Motivo: " << p.motivo << endl;
+    
+    p.estado = "Atendido";
+    pila.apilar(p); // Guardar en historial
+    
+    cout << "\nPaciente atendido correctamente.\n";
+}
+
+void buscarPaciente(ColaPacientes& cola) {
+    string nombre;
+    cout << "\nIngrese nombre a buscar: ";
+    cin.ignore();
+    getline(cin, nombre);
+    
+    Nodo* encontrado = cola.buscarPorNombre(nombre);
+    
+    if(encontrado != NULL) {
+        cout << "\n=== PACIENTE ENCONTRADO ===\n";
+        cout << "Nombre: " << encontrado->datos.nombre << endl;
+        cout << "DNI: " << encontrado->datos.dni << endl;
+        cout << "Edad: " << encontrado->datos.edad << endl;
+        cout << "Motivo: " << encontrado->datos.motivo << endl;
+        cout << "Estado: " << encontrado->datos.estado << endl;
+        cout << "Receta medica: " << (encontrado->datos.tieneReceta ? "SI" : "NO") << endl;
+    } else {
+        cout << "\nPaciente no encontrado.\n";
+    }
+}
+
+void agregarRecetaMedica(ColaPacientes& cola) {
+    string dni, rutaImagen;
+    
+    cout << "\n=== AGREGAR RECETA MEDICA ===\n";
+    cout << "Ingrese DNI del paciente: ";
+    cin.ignore();
+    getline(cin, dni);
+    
+    cout << "\nIngrese ruta completa de la imagen (Ej: C:\\imagenes\\receta.jpg): ";
+    getline(cin, rutaImagen);
+    
+    cola.agregarRecetaPaciente(dni, rutaImagen);
+}
+
+void verRecetaMedica(ColaPacientes& cola) {
+    string dni;
+    
+    cout << "\n=== VER RECETA MEDICA ===\n";
+    cout << "Ingrese DNI del paciente: ";
+    cin.ignore();
+    getline(cin, dni);
+    
+    abrirReceta(dni);
+}
+
+void listarRecetasMedicas() {
+    cout << "\n=== RECETAS MEDICAS ALMACENADAS ===\n";
+    
+    // Comando para listar archivos en la carpeta
+    system("dir Recetas_Medicas\\*.jpg /B 2>nul");
+    
+    cout << "\nPara ver una receta, use la opcion 15.\n";
+}
+
+void mostrarHistorial() {
+    cout << "\n=== HISTORIAL DE ATENCIONES ===\n";
+    if(contadorHistorial == 0) {
+        cout << "No hay atenciones registradas.\n";
+        return;
+    }
+    
+    for(int i = 0; i < contadorHistorial; i++) {
+        cout << (i+1) << ". " << historialAtenciones[i] << endl;
+    }
+}
