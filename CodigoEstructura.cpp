@@ -85,3 +85,69 @@ void mostrarHorarios() {
         cout << endl;
     }
 }
+
+// ============================================
+// FUNCIONES PARA MANEJO DE RECETAS MEDICAS
+// ============================================
+
+// Crear directorio para almacenar recetas si no existe
+void crearDirectorioRecetas() {
+    _mkdir("Recetas_Medicas"); // Crea carpeta en Windows
+}
+
+// Copiar archivo de imagen a la carpeta del sistema
+bool copiarReceta(string rutaOrigen, string dni) {
+    // Abrir archivo origen en modo binario
+    ifstream archivoOrigen(rutaOrigen.c_str(), ios::binary);
+    
+    if(!archivoOrigen) {
+        cout << "\nError: No se pudo abrir el archivo de imagen.\n";
+        return false;
+    }
+    
+    // Crear nombre de archivo destino
+    string nombreDestino = "Recetas_Medicas/receta_" + dni + ".jpg";
+    ofstream archivoDestino(nombreDestino.c_str(), ios::binary);
+    
+    if(!archivoDestino) {
+        cout << "\nError: No se pudo crear el archivo destino.\n";
+        archivoOrigen.close();
+        return false;
+    }
+    
+    // Copiar byte por byte
+    char buffer;
+    while(archivoOrigen.get(buffer)) {
+        archivoDestino.put(buffer);
+    }
+    
+    archivoOrigen.close();
+    archivoDestino.close();
+    
+    cout << "\nReceta guardada exitosamente en: " << nombreDestino << endl;
+    return true;
+}
+
+// Verificar si existe una receta para un paciente
+bool existeReceta(string dni) {
+    string ruta = "Recetas_Medicas/receta_" + dni + ".jpg";
+    ifstream archivo(ruta.c_str());
+    bool existe = archivo.good();
+    archivo.close();
+    return existe;
+}
+
+// Abrir imagen de receta con visor predeterminado
+void abrirReceta(string dni) {
+    string ruta = "Recetas_Medicas/receta_" + dni + ".jpg";
+    
+    if(!existeReceta(dni)) {
+        cout << "\nNo existe receta medica para el DNI: " << dni << endl;
+        return;
+    }
+    
+    cout << "\nAbriendo receta medica...\n";
+    // Comando para abrir con visor predeterminado en Windows
+    string comando = "start " + ruta;
+    system(comando.c_str());
+}
